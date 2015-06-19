@@ -192,6 +192,89 @@ namespace MonoGame.Framework.WindowsPhone
             return game;
         }
 
+        static public T Create(string launchParameters, PhoneApplicationPage page, UserControl control)
+        {
+            if (launchParameters == null)
+                throw new NullReferenceException("The launch parameters cannot be null!");
+            if (control == null)
+                throw new NullReferenceException("The control parameter cannot be null!");
+
+            UIElement drawingSurface = control.Content as DrawingSurfaceBackgroundGrid;
+
+            MediaElement mediaElement = null;
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(control.Content); i++)
+            {
+                var child = VisualTreeHelper.GetChild(control.Content, i);
+                if (child is MediaElement)
+                    mediaElement = (MediaElement)child;
+                else if (drawingSurface == null && child is DrawingSurface)
+                    drawingSurface = (DrawingSurface)child;
+            }
+
+            if (!(drawingSurface is DrawingSurfaceBackgroundGrid) && !(drawingSurface is DrawingSurface))
+                throw new NullReferenceException("The drawing surface could not be found!");
+
+            if (mediaElement == null)
+                throw new NullReferenceException("The media element could not be found! Add it to the GamePage.");
+
+            Microsoft.Xna.Framework.Media.MediaPlayer._mediaElement = mediaElement;
+
+            WindowsPhoneGamePlatform.LaunchParameters = launchParameters;
+            WindowsPhoneGameWindow.Width = ((FrameworkElement)drawingSurface).ActualWidth;
+            WindowsPhoneGameWindow.Height = ((FrameworkElement)drawingSurface).ActualHeight;
+            WindowsPhoneGameWindow.Page = page;
+
+            Microsoft.Xna.Framework.Audio.SoundEffect.InitializeSoundEffect();
+
+            page.BackKeyPress += PageOnBackKeyPress;
+
+            // Construct the game.
+            var game = new T();
+            if (game.graphicsDeviceManager == null)
+                throw new NullReferenceException("You must create the GraphicsDeviceManager in the Game constructor!");
+
+            SurfaceTouchHandler surfaceTouchHandler = new SurfaceTouchHandler(WindowsPhoneGamePlatform.TouchQueue);
+
+            if (drawingSurface is DrawingSurfaceBackgroundGrid)
+            {
+                // Hookup the handlers for updates and touch.
+                DrawingSurfaceBackgroundGrid drawingSurfaceBackgroundGrid = (DrawingSurfaceBackgroundGrid)drawingSurface;
+                drawingSurfaceBackgroundGrid.SetBackgroundContentProvider(new DrawingSurfaceBackgroundContentProvider(game));
+                drawingSurfaceBackgroundGrid.SetBackgroundManipulationHandler(surfaceTouchHandler);
+            }
+            else
+            {
+                var drawingSurfaceUpdateHandler = new DrawingSurfaceUpdateHandler(game);
+                DrawingSurface ds = (DrawingSurface)drawingSurface;
+
+                RoutedEventHandler onLoadedHandler = (object sender, RoutedEventArgs e) =>
+                {
+                    if (sender != ds)
+                        return;
+
+                    if (initializedSurfaces.ContainsKey(ds) == false)
+                    {
+                        // Hook-up native component to DrawingSurface
+                        ds.SetContentProvider(drawingSurfaceUpdateHandler.ContentProvider);
+                        ds.SetManipulationHandler(surfaceTouchHandler);
+
+                        // Make sure surface is not initialized twice...
+                        initializedSurfaces.Add(ds, true);
+                    }
+                };
+
+                // Don't wait for loaded event here since control might
+                // be loaded already.
+                onLoadedHandler(ds, null);
+
+                ds.Unloaded += OnDrawingSurfaceUnloaded;
+                ds.Loaded += onLoadedHandler;
+            }
+
+            // Return the constructed, but not initialized game.
+            return game;
+        }
+
         private static void PageOnBackKeyPress(object sender, CancelEventArgs e)
         {
             if (!e.Cancel)
