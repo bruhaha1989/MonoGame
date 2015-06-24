@@ -108,7 +108,7 @@ namespace Microsoft.Xna.Framework
             UIApplication.SharedApplication.SetStatusBarHidden(true, UIStatusBarAnimation.Fade);
 
             // Create a full-screen window
-            _mainWindow = new UIWindow (UIScreen.MainScreen.Bounds);
+            _mainWindow = UIApplication.SharedApplication.Windows[0];
 			//_mainWindow.AutoresizingMask = UIViewAutoresizing.FlexibleDimensions;
 			
             game.Services.AddService (typeof(UIWindow), _mainWindow);
