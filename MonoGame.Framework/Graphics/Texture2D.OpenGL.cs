@@ -395,8 +395,8 @@ namespace Microsoft.Xna.Framework.Graphics
 #if IOS || MONOMAC
         private static Texture2D PlatformFromStream(GraphicsDevice graphicsDevice, CGImage cgImage)
         {
-			var width = cgImage.Width;
-			var height = cgImage.Height;
+			var width = (nint)NearestPowerOfTwo((int)cgImage.Width);
+            var height = (nint)NearestPowerOfTwo((int)cgImage.Height);
 
             var data = new byte[width * height * 4];
 
@@ -415,6 +415,16 @@ namespace Microsoft.Xna.Framework.Graphics
 
             return texture;
         }
+        
+        public static int NearestPowerOfTwo(int n)
+        {
+            double y = Math.Floor(Math.Log(n, 2));
+            int prevPOT = (int)Math.Pow(2, y);
+            int nextPOT = (int)Math.Pow(2, y + 1);
+
+            return (n - prevPOT) < (nextPOT - n) ? prevPOT : nextPOT;
+        }
+        
 #elif ANDROID
         private static Texture2D PlatformFromStream(GraphicsDevice graphicsDevice, Bitmap image)
         {
