@@ -149,6 +149,9 @@
         <Platforms>Windows,MacOS,Linux</Platforms>
     </Compile>
     <Compile Include="ContentPipeline\AssetTestUtility.cs" />
+    <Compile Include="ContentPipeline\BitmapContentTests.cs">
+        <Platforms>Windows,MacOS,Linux</Platforms>
+    </Compile>
     <Compile Include="ContentPipeline\EffectProcessorTests.cs">
         <Platforms>Windows</Platforms>
     </Compile>
@@ -235,6 +238,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Effects\ParserTest.fx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Effects\PreprocessorInclude.fxh">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Effects\PreprocessorTest.fx">
