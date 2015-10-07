@@ -204,7 +204,7 @@ namespace Microsoft.Xna.Framework
             // In iOS 8+ we need to set the root view controller *after* Window MakeKey
             // This ensures that the viewController's supported interface orientations
             // will be respected at launch
-            _mainWindow.RootViewController = _viewController;
+            //_mainWindow.RootViewController = _viewController;
 
             BeginObservingUIApplication();
 
