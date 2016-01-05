@@ -173,6 +173,12 @@ namespace MonoGame.Utilities
             return AL.GetSourceState(alSourceId);
         }
 
+        public void SeekToPosition(TimeSpan pos)
+        {
+            Reader.DecodedTime = pos;
+            AL.SourceStop(alSourceId);
+        }
+
         public TimeSpan GetPosition()
         {
             if (Reader == null)
@@ -237,7 +243,7 @@ namespace MonoGame.Utilities
 
             if (ALHelper.Efx.IsInitialized)
                 ALHelper.Efx.DeleteFilter(alFilterId);
-
+            
             ALHelper.Check();
         }
 
